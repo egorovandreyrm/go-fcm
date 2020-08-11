@@ -45,12 +45,9 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 		return nil, ErrInvalidAPIKey
 	}
 	
-	config := &tls.Config{
-		InsecureSkipVerify: true
-	}
-	
-	tr := &http.Transport{TLSClientConfig: config}
-	
+	tr := &http.Transport{
+        TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+    }
 	
 	c := &Client{
 		apiKey:   apiKey,
