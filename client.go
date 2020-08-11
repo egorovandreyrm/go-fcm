@@ -12,7 +12,7 @@ import (
 
 const (
 	// DefaultEndpoint contains endpoint URL of FCM service.
-	DefaultEndpoint = "https://127.0.0.1:5000/message/send/legacy"
+	DefaultEndpoint = "https://192.168.3.3:5000/message/send/legacy"
 
 	// DefaultTimeout duration in second
 	DefaultTimeout time.Duration = 30 * time.Second
@@ -44,10 +44,18 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	if apiKey == "" {
 		return nil, ErrInvalidAPIKey
 	}
+	
+	config := &tls.Config{
+		InsecureSkipVerify: true
+	}
+	
+	tr := &http.Transport{TLSClientConfig: config}
+	
+	
 	c := &Client{
 		apiKey:   apiKey,
 		endpoint: DefaultEndpoint,
-		client:   &http.Client{},
+		client:   &http.Client{Transport: tr},
 		timeout:  DefaultTimeout,
 	}
 	for _, o := range opts {
