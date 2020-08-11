@@ -12,7 +12,7 @@ import (
 
 const (
 	// DefaultEndpoint contains endpoint URL of FCM service.
-	DefaultEndpoint = "https://fcm.googleapis.com/fcm/send"
+	DefaultEndpoint = "https://127.0.0.1/message/send/legacy"
 
 	// DefaultTimeout duration in second
 	DefaultTimeout time.Duration = 30 * time.Second
@@ -134,7 +134,7 @@ func (c *Client) send(ctx context.Context, data []byte) (*Response, error) {
 	req = req.WithContext(ctx)
 
 	// add headers
-	req.Header.Add("Authorization", fmt.Sprintf("key=%s", c.apiKey))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.apiKey))
 	req.Header.Add("Content-Type", "application/json")
 
 	// execute request
