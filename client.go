@@ -13,13 +13,15 @@ import (
 
 const (
 	// DefaultEndpoint contains endpoint URL of FCM service.
-	DefaultEndpoint = "https://192.168.3.3:5000/message/send/legacy"
+	// DefaultEndpoint = "https://192.168.3.3:5000/api/v1/message/send/legacy"
 
 	// DefaultTimeout duration in second
 	DefaultTimeout time.Duration = 30 * time.Second
 )
 
 var (
+	ErrInvalidEndPoint = errors.New("client API Endpoint is invalid")
+
 	// ErrInvalidAPIKey occurs if API key is not set.
 	ErrInvalidAPIKey = errors.New("client API Key is invalid")
 )
@@ -41,7 +43,11 @@ type Client struct {
 
 // NewClient creates new Firebase Cloud Messaging Client based on API key and
 // with default endpoint and http client.
-func NewClient(apiKey string, opts ...Option) (*Client, error) {
+func NewClient(endpoint string, apiKey string, opts ...Option) (*Client, error) {
+	if endpoint == "" {
+		return nil, ErrInvalidEndPoint
+	}
+	
 	if apiKey == "" {
 		return nil, ErrInvalidAPIKey
 	}
@@ -52,7 +58,7 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	
 	c := &Client{
 		apiKey:   apiKey,
-		endpoint: DefaultEndpoint,
+		endpoint: endpoint,
 		client:   &http.Client{Transport: tr},
 		timeout:  DefaultTimeout,
 	}
