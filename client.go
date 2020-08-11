@@ -12,7 +12,7 @@ import (
 
 const (
 	// DefaultEndpoint contains endpoint URL of FCM service.
-	DefaultEndpoint = "https://127.0.0.1/message/send/legacy"
+	DefaultEndpoint = "https://127.0.0.1:5000/message/send/legacy"
 
 	// DefaultTimeout duration in second
 	DefaultTimeout time.Duration = 30 * time.Second
