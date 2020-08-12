@@ -9,21 +9,20 @@ import (
 	"net/http"
 	"time"
 	"crypto/tls"
+	"crypto/x509"
+	"io/ioutil"
 )
 
 const (
-	// DefaultEndpoint contains endpoint URL of FCM service.
-	// DefaultEndpoint = "https://192.168.3.3:5000/api/v1/message/send/legacy"
-
 	// DefaultTimeout duration in second
 	DefaultTimeout time.Duration = 30 * time.Second
 )
 
 var (
 	ErrInvalidEndPoint = errors.New("client API Endpoint is invalid")
-
-	// ErrInvalidAPIKey occurs if API key is not set.
+	ErrInvalidCertFile = errors.New("client cert file is invalid")
 	ErrInvalidAPIKey = errors.New("client API Key is invalid")
+	ErrFailedToReadScmServerCert = errors.New("failed to read scm server certificate")	
 )
 
 // Client abstracts the interaction between the application server and the
@@ -43,19 +42,39 @@ type Client struct {
 
 // NewClient creates new Firebase Cloud Messaging Client based on API key and
 // with default endpoint and http client.
-func NewClient(endpoint string, apiKey string, opts ...Option) (*Client, error) {
+func NewClient(endpoint string, certFile string, apiKey string, opts ...Option) (*Client, error) {
 	if endpoint == "" {
 		return nil, ErrInvalidEndPoint
+	}
+	
+	if certFile == "" {
+		return nil, ErrInvalidCertFile
 	}
 	
 	if apiKey == "" {
 		return nil, ErrInvalidAPIKey
 	}
 	
-	tr := &http.Transport{
-        TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-    }
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
 	
+	certs, err := ioutil.ReadFile(certFile)
+	if err != nil {
+		return nil, err
+	}
+	
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		return nil, ErrFailedToReadScmServerCert	
+	}
+	
+	config := &tls.Config{
+		RootCAs: rootCAs,
+	}
+	
+	tr := &http.Transport{TLSClientConfig: config}
+
 	c := &Client{
 		apiKey:   apiKey,
 		endpoint: endpoint,
